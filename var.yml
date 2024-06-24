@@ -1,0 +1,13 @@
+ca_certificates: CA1.crt,CA2.crt,CA3.crt
+python_app_dir: /opt/example
+python_app_files: "{{ playbook_dir }}/files/my-python-app/"
+instance_config_files: "{{ playbook_dir }}/files/instance/"
+app_port: 5000
+deployment_location: /opt/example
+wheel_file_name: Example-1.1.1-py3-none-any.whl
+instance_path: /opt/example/instance
+config_vars:
+  SECRET_KEY: QVZlcnlTYWZlRXhhbXBsZUtleTEyMyE=
+  DB_PATH: postgresql://example_user:myVerySecretDatabasePassword@localhost:5432/example_db  
+  ADMIN_GROUPS: Read-only,Read-write,Super
+

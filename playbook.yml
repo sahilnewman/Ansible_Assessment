@@ -1,0 +1,77 @@
+---
+- name: Configure CA certificates and deploy Python application
+  hosts: all
+  become: true
+  vars_files:
+    - vars.yml
+
+  tasks:
+    - name: Ensure CA certificates are present (Linux)
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /usr/local/share/ca-certificates/
+      with_items: "{{ ca_certificates }}"
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+    - name: Update CA certificates (Debian)
+      ansible.builtin.command: update-ca-certificates
+      when: ansible_os_family == 'Debian'
+
+    - name: Update CA certificates (RedHat)
+      ansible.builtin.command: update-ca-trust
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install Python and virtualenv (Linux)
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - python3
+        - python3-venv
+        - python3-pip
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+    - name: Create virtual environment (Linux)
+      ansible.builtin.command:
+        cmd: python3 -m venv venv
+        chdir: "{{ python_app_dir }}"
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+    - name: Install Python requirements (Linux)
+      ansible.builtin.command:
+        cmd: venv/bin/pip install -r requirements.txt
+        chdir: "{{ python_app_dir }}"
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+    - name: Deploy Python application files (Linux)
+      ansible.builtin.copy:
+        src: "{{ python_app_files }}"
+        dest: "{{ python_app_dir }}/"
+        mode: '0755'
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+
+    - name: Create instance directory (Linux)
+      ansible.builtin.file:
+        path: "{{ python_app_dir }}/instance"
+        state: directory
+
+    - name: Deploy instance configuration files (Linux)
+      ansible.builtin.copy:
+        src: "{{ instance_config_files }}"
+        dest: "{{ python_app_dir }}/instance/"
+        mode: '0644'
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'
+    
+    - name: Generate application configuration (Linux)
+      ansible.builtin.template:
+        src: templates/config.j2
+        dest: "{{ instance_path }}/config.conf"
+        mode: '0644'
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat' 
+
+    - name: Deploy run.sh script (Linux)
+      ansible.builtin.copy:
+        src: files/my-python-app/run.sh
+        dest: "{{ deployment_location }}/run.sh"
+        mode: '0755'
+      when: ansible_os_family == 'Debian' or ansible_os_family == 'RedHat'

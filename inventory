@@ -1,0 +1,2 @@
+[linux_hosts]
+<hostname/IP> ansible_ssh_user=<username> ansible_ssh_pass=<enter password>

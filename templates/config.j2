@@ -1,0 +1,13 @@
+# templates/config.j2
+[app]
+port = {{ app_port }}
+
+[secrets]
+SECRET_KEY = {{ config_vars.SECRET_KEY }}
+
+[database]
+DB_PATH = {{ config_vars.DB_PATH }}
+
+[admin]
+ADMIN_GROUPS = {{ config_vars.ADMIN_GROUPS }}
+
